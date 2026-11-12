@@ -1,0 +1,84 @@
+.ntfy-page {
+  padding: 24px;
+  max-width: 880px;
+  font-family: inherit;
+  display: grid;
+  gap: 20px;
+}
+.ntfy-page h1 {
+  font-size: 20px;
+  margin: 0;
+}
+.ntfy-page h2 {
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+.ntfy-card {
+  border: 1px solid var(--border, #3a3a3a);
+  border-radius: 8px;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+.ntfy-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.ntfy-page label {
+  font-size: 13px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.ntfy-page input[type="text"],
+.ntfy-page input[type="url"],
+.ntfy-page input[type="number"] {
+  padding: 5px 8px;
+  border: 1px solid var(--border, #3a3a3a);
+  border-radius: 6px;
+  background: var(--background, transparent);
+  color: inherit;
+  min-width: 180px;
+}
+.ntfy-page button {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #3a3a3a);
+  background: var(--secondary, #2a2a2a);
+  color: inherit;
+  cursor: pointer;
+  font-size: 13px;
+}
+.ntfy-page button.primary {
+  background: var(--primary, #3b82f6);
+  border-color: transparent;
+  color: #fff;
+}
+.ntfy-page button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.ntfy-muted {
+  color: var(--muted-foreground, #888);
+  font-size: 12.5px;
+}
+.ntfy-error {
+  color: var(--destructive, #ef4444);
+  font-size: 13px;
+}
+.ntfy-ok {
+  color: var(--success, #22c55e);
+  font-size: 13px;
+}
+.ntfy-members {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ntfy-cats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
