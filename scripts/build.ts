@@ -24,7 +24,7 @@ const jobs: Array<{
   {
     entry: "src/ui/index.tsx",
     outdir: "dist/ui",
-    naming: "index.js",
+    naming: "index.[ext]",
     target: "browser",
     external: [
       "@paperclipai/plugin-sdk/ui",
