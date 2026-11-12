@@ -203,7 +203,13 @@ test("subscriptions-set rejects unknown channelId; valid set replaces", async ()
   );
   expect(good.status).toBe(200);
   const state = (await handleApiRequest(h.ctx, req("admin-state", { userId: ADMIN }), deps()))
-    .body as { subscriptions: Array<{ principalId: string; channelId: string }> };
+    .body as {
+      subscriptions: Array<{
+        principalId: string;
+        principalType: string;
+        channelId: string;
+      }>;
+    };
   expect(state.subscriptions).toEqual([
     { principalId: "u-target", principalType: "user", channelId: "ch1" },
   ]);
