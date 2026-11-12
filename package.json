@@ -1,6 +1,6 @@
 {
   "name": "ntfy-paperclip-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Paperclip plugin that forwards company events to ntfy topics",
   "main": "dist/worker.js",
   "module": "dist/worker.js",
