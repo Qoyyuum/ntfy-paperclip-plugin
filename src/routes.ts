@@ -34,6 +34,12 @@ async function resolveAuth(ctx: PluginContext, companyId: string) {
   return { cfg, authHeader };
 }
 
+function configError(err: unknown): PluginApiResponse {
+  return json(500, {
+    error: err instanceof Error ? err.message : String(err),
+  });
+}
+
 export async function handleApiRequest(
   ctx: PluginContext,
   input: PluginApiRequestInput,
@@ -94,8 +100,19 @@ export async function handleApiRequest(
       if (invalid.length) {
         return json(400, { error: `unknown categories: ${invalid.join(", ")}` });
       }
+      if (
+        body.priority != null &&
+        (!Number.isInteger(body.priority) ||
+          (body.priority as number) < 1 ||
+          (body.priority as number) > 5)
+      ) {
+        return json(400, { error: "priority must be an integer 1-5" });
+      }
       const state = await loadState(ctx, input.companyId);
-      const id = input.params.id || crypto.randomUUID();
+      const id =
+        input.params.id && input.params.id !== "new"
+          ? input.params.id
+          : crypto.randomUUID();
       const channel = {
         id,
         name,
@@ -135,9 +152,22 @@ export async function handleApiRequest(
           error: "principalId, principalType, and channelIds are required",
         });
       }
-      const state = await loadState(ctx, input.companyId);
+      const [state, members] = await Promise.all([
+        loadState(ctx, input.companyId),
+        ctx.access.members.list({ companyId: input.companyId }),
+      ]);
+      const isMember = members.some(
+        (m) =>
+          m.status === "active" &&
+          m.principalId === principalId &&
+          m.principalType === principalType,
+      );
+      if (!isMember) {
+        return json(400, { error: "principal is not an active company member" });
+      }
       const known = new Set(state.channels.map((c) => c.id));
-      const unknown = channelIds.filter((id) => !known.has(id as string));
+      const uniqueChannelIds = [...new Set(channelIds as string[])];
+      const unknown = uniqueChannelIds.filter((id) => !known.has(id));
       if (unknown.length) {
         return json(400, { error: `unknown channels: ${unknown.join(", ")}` });
       }
@@ -145,7 +175,7 @@ export async function handleApiRequest(
         (s) =>
           !(s.principalId === principalId && s.principalType === principalType),
       );
-      for (const channelId of channelIds as string[]) {
+      for (const channelId of uniqueChannelIds) {
         kept.push({ principalId, principalType, channelId });
       }
       await saveSubscriptions(ctx, input.companyId, kept);
@@ -160,7 +190,13 @@ export async function handleApiRequest(
       const state = await loadState(ctx, input.companyId);
       const channel = state.channels.find((c) => c.id === channelId);
       if (!channel) return json(404, { error: "channel not found" });
-      const { cfg, authHeader } = await resolveAuth(ctx, input.companyId);
+      let resolved: Awaited<ReturnType<typeof resolveAuth>>;
+      try {
+        resolved = await resolveAuth(ctx, input.companyId);
+      } catch (err) {
+        return configError(err);
+      }
+      const { cfg, authHeader } = resolved;
       try {
         await publish(fetchFn, {
           baseUrl: cfg.baseUrl,
@@ -180,15 +216,30 @@ export async function handleApiRequest(
     }
 
     case "server-status": {
-      const { cfg, authHeader } = await resolveAuth(ctx, input.companyId);
-      return getServerStatus(cfg, authHeader, {
+      let resolved: Awaited<ReturnType<typeof resolveAuth>>;
+      try {
+        resolved = await resolveAuth(ctx, input.companyId);
+      } catch (err) {
+        return json(200, {
+          health: "error",
+          status: "config-error",
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+      return getServerStatus(resolved.cfg, resolved.authHeader, {
         fetchFn,
         ...(deps.exec ? { exec: deps.exec } : {}),
       });
     }
 
     case "server-setup": {
-      const { cfg, authHeader } = await resolveAuth(ctx, input.companyId);
+      let resolved: Awaited<ReturnType<typeof resolveAuth>>;
+      try {
+        resolved = await resolveAuth(ctx, input.companyId);
+      } catch (err) {
+        return configError(err);
+      }
+      const { cfg, authHeader } = resolved;
       return runSetup(body as unknown as ServerSetupBody, {
         fetchFn,
         ...(deps.exec ? { exec: deps.exec } : {}),

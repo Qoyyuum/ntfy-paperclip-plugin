@@ -144,7 +144,18 @@ export async function runSetup(
   }
 
   if (body.op === "start-container") {
-    if (!body.containerId) return err(400, "containerId is required");
+    if (
+      typeof body.containerId !== "string" ||
+      !/^[a-zA-Z0-9_.-]+$/.test(body.containerId)
+    ) {
+      return err(400, "a valid containerId is required");
+    }
+    const probe = await probeRuntimes(exec);
+    const runtime = probe.runtimes.find((r) => r.name === body.runtime);
+    if (!runtime) return err(400, `${body.runtime} is not available`);
+    if (!runtime.stoppedContainers.some((c) => c.id === body.containerId)) {
+      return err(400, "containerId is not a stopped ntfy container");
+    }
     const out = await tryExec(exec, body.runtime, ["start", body.containerId]);
     if (out === null) return err(500, `${body.runtime} start failed`);
     return { status: 200, body: { ok: true, health: await health() } };
@@ -152,6 +163,9 @@ export async function runSetup(
 
   if (body.op === "compose-up") {
     const port = body.port ?? 2580;
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      return err(400, "port must be an integer between 1 and 65535");
+    }
     const dir = deps.dataDir ?? join(homedir(), ".local", "share", "ntfy-paperclip-plugin");
     mkdirSync(dir, { recursive: true });
     const file = join(dir, "docker-compose.yml");
@@ -180,6 +194,10 @@ export async function runSetup(
         health: await health(),
         suggestedBaseUrl: `http://localhost:${port}`,
         composeFile: file,
+        warning:
+          "The generated config exposes ntfy on all interfaces with no authentication. Set authMode to 'token' or 'basic' and configure ntfy access control before exposing port " +
+          port +
+          " beyond localhost.",
       },
     };
   }

@@ -86,6 +86,17 @@ export async function formatEvent(
           body: `Agent ${label}: ${event.eventType}`,
         };
       }
+      case "approval": {
+        const approval = event.entityId
+          ? await ctx.approvals.get(event.entityId, event.companyId)
+          : null;
+        return {
+          title: `Paperclip: ${event.eventType}`,
+          body: approval
+            ? `Approval ${approval.type} — ${approval.status}`
+            : fallback.body,
+        };
+      }
       case "goal": {
         const goal = event.entityId
           ? await ctx.goals.get(event.entityId, event.companyId)

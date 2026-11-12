@@ -26,6 +26,7 @@ export const manifest: PaperclipPluginManifestV1 = {
     "ui.page.register",
     "companies.read",
     "issues.read",
+    "approvals.read",
     "agents.read",
     "projects.read",
     "goals.read",

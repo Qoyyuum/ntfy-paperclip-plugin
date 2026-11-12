@@ -59,7 +59,13 @@ test("probeRuntimes never throws when everything is missing", async () => {
 });
 
 test("runSetup start-container starts and re-probes", async () => {
-  const { calls, fn } = fakeExec({ "docker start": "" });
+  const { calls, fn } = fakeExec({
+    "command -v docker": "/usr/bin/docker",
+    "docker compose version": "2.20",
+    "docker ps -a --format": "abc123 ntfy\n",
+    "docker inspect": "exited",
+    "docker start": "",
+  });
   const res = await runSetup(
     { op: "start-container", runtime: "docker", containerId: "abc123" },
     { exec: fn, checkHealth: async () => "up" },

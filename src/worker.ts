@@ -18,8 +18,15 @@ const plugin = definePlugin({
     workerCtx = ctx;
     for (const eventType of Object.keys(EVENT_CATEGORY_MAP)) {
       ctx.events.on(eventType as PluginEventType, async (event) => {
-        const result = await dispatchEvent(ctx, event);
-        lastPublish = { at: new Date().toISOString(), ...result };
+        try {
+          const result = await dispatchEvent(ctx, event);
+          lastPublish = { at: new Date().toISOString(), ...result };
+        } catch (err) {
+          ctx.logger.error("ntfy dispatch failed", {
+            eventType: event.eventType,
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
       });
     }
     ctx.logger.info("ntfy plugin started", {

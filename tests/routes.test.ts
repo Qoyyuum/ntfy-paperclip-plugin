@@ -179,7 +179,7 @@ test("subscriptions-set rejects unknown channelId; valid set replaces", async ()
       userId: ADMIN,
       body: {
         companyId: COMPANY,
-        principalId: "u-target",
+        principalId: VIEWER,
         principalType: "user",
         channelIds: ["nope"],
       },
@@ -194,7 +194,7 @@ test("subscriptions-set rejects unknown channelId; valid set replaces", async ()
       userId: ADMIN,
       body: {
         companyId: COMPANY,
-        principalId: "u-target",
+        principalId: VIEWER,
         principalType: "user",
         channelIds: ["ch1"],
       },
@@ -211,7 +211,7 @@ test("subscriptions-set rejects unknown channelId; valid set replaces", async ()
       }>;
     };
   expect(state.subscriptions).toEqual([
-    { principalId: "u-target", principalType: "user", channelId: "ch1" },
+    { principalId: VIEWER, principalType: "user", channelId: "ch1" },
   ]);
 });
 
@@ -232,7 +232,7 @@ test("channel-delete removes channel and its subscriptions", async () => {
       userId: ADMIN,
       body: {
         companyId: COMPANY,
-        principalId: "u1",
+        principalId: VIEWER,
         principalType: "user",
         channelIds: ["ch1"],
       },

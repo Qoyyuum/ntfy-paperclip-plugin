@@ -45,8 +45,9 @@ interface AdminState {
 }
 
 interface ServerStatus {
-  health: "up" | "auth-required" | "unreachable";
+  health: "up" | "auth-required" | "unreachable" | "error";
   status: string;
+  error?: string;
   runtimes?: Array<{
     name: "docker" | "podman";
     compose: boolean;
@@ -113,7 +114,7 @@ export function NotificationsAdminPage({ context }: PluginPageProps) {
     for (const m of state?.members ?? []) {
       map.set(
         `${m.principalType}:${m.principalId}`,
-        `${m.principalType === "agent" ? "agent" : "user"} ${m.principalId.slice(0, 8)}${m.membershipRole ? ` (${m.membershipRole})` : ""}`,
+        `${m.principalType === "agent" ? "agent" : "user"} ${m.principalId}${m.membershipRole ? ` (${m.membershipRole})` : ""}`,
       );
     }
     return map;
@@ -224,7 +225,11 @@ export function NotificationsAdminPage({ context }: PluginPageProps) {
         {status ? (
           <p>
             Status:{" "}
-            {status.health === "up" ? (
+            {status.status === "config-error" ? (
+              <span className="ntfy-error">
+                misconfigured — {status.error}
+              </span>
+            ) : status.health === "up" ? (
               <span className="ntfy-ok">reachable</span>
             ) : status.health === "auth-required" ? (
               <span className="ntfy-error">authentication required</span>
@@ -301,6 +306,7 @@ export function NotificationsAdminPage({ context }: PluginPageProps) {
                         void call(async () => {
                           const res = await apiSend<{
                             suggestedBaseUrl?: string;
+                            warning?: string;
                           }>("POST", "/admin/server-setup", companyId!, {
                             op: "compose-up",
                             runtime,
@@ -308,7 +314,7 @@ export function NotificationsAdminPage({ context }: PluginPageProps) {
                           await load();
                           if (res?.suggestedBaseUrl) {
                             setError(
-                              `ntfy started. Set baseUrl to ${res.suggestedBaseUrl} in plugin settings.`,
+                              `ntfy started. Set baseUrl to ${res.suggestedBaseUrl} in plugin settings.${res.warning ? ` ${res.warning}` : ""}`,
                             );
                           }
                         })
