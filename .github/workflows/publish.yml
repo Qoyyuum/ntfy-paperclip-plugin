@@ -41,5 +41,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - run: bun run build
+      # jsr publishes source, not dist — but needs deps installed for type resolution
+      - run: bun install
       - run: bunx jsr@latest publish
