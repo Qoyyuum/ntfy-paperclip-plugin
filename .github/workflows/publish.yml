@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+g   runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -22,6 +22,9 @@ jobs:
   npm:
     needs: verify
     runs-on: ubuntu-latest
+    # Gated by the 'npm' environment — requires approval in repo settings
+    # before the publish step runs.
+    environment: npm
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -31,9 +34,7 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: bun install
       - run: bun run build
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm stage publish
 
   jsr:
     needs: verify

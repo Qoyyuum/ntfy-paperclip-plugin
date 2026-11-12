@@ -1,6 +1,7 @@
 import {
   definePlugin,
   runWorker,
+  type PaperclipPlugin,
   type PluginContext,
   type PluginEventType,
 } from "@paperclipai/plugin-sdk";
@@ -11,7 +12,7 @@ import { handleApiRequest } from "./routes";
 let lastPublish: { at: string; published: number; failed: number } | null = null;
 let workerCtx: PluginContext | null = null;
 
-const plugin = definePlugin({
+const plugin: PaperclipPlugin = definePlugin({
   multiCompanyConfig: true,
 
   async setup(ctx) {
