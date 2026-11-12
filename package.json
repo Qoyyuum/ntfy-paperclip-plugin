@@ -1,9 +1,21 @@
 {
   "name": "ntfy-paperclip-plugin",
-  "module": "index.ts",
+  "version": "0.1.0",
+  "description": "Paperclip plugin that forwards company events to ntfy topics",
+  "module": "dist/worker.js",
   "type": "module",
-  "private": true,
+  "license": "MIT",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
+    "build": "bun scripts/build.ts",
+    "test": "bun test",
     "typecheck": "bun check"
   },
   "devDependencies": {
